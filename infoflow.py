@@ -2,7 +2,13 @@ import torch
 from torch.optim.optimizer import Optimizer
 
 class InfoFlow(Optimizer):
-    """InfoFlow Optimizer - Normaliza el gradiente por su "flujo de información"."""
+    """
+    InfoFlow Optimizer™
+    Inspirado en Information Field Theory (Juan Diego Vicente Gabancho, 2026)
+    
+    Normaliza el gradiente por su "flujo de información" (ρ(x)) para mayor estabilidad
+    y mejor convergencia en las primeras épocas.
+    """
     def __init__(self, params, lr=0.1, eps=1e-8, beta=0.9, weight_decay=1e-4):
         defaults = dict(lr=lr, eps=eps, beta=beta, weight_decay=weight_decay)
         super().__init__(params, defaults)
@@ -24,22 +30,21 @@ class InfoFlow(Optimizer):
 
                 grad = p.grad.data
 
-                # Weight decay (L2 regularization)
+                # Weight decay (L2)
                 if weight_decay != 0:
                     grad = grad.add(p.data, alpha=weight_decay)
 
-                # 🔥 CORE: Information Flow normalization
+                # 🔥 CORE: Information Flow normalization (∇log ρ)
                 info_grad = grad / (grad.abs().mean() + eps)
 
-                # Momentum (estándar como en Adam/SGD)
+                # Momentum estándar
                 state = self.state[p]
                 if len(state) == 0:
                     state['momentum'] = torch.zeros_like(p.data)
-
                 momentum = state['momentum']
                 momentum.mul_(beta).add_(info_grad, alpha=1 - beta)
 
-                # Actualización moderna (sin warnings)
+                # Actualización limpia (sin warnings)
                 p.data.add_(momentum, alpha=-lr)
 
         return loss
