@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/content/infoflow-optimizer/infoflow-optimizer')
 import torch
 import torch.nn as nn
 import torch.optim as optim
