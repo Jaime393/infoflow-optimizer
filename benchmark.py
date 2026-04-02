@@ -1,47 +1,50 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
-from infoflow import InfoFlow
+import torchvision
+import torchvision.transforms as transforms
+from infoflow_optimizer.infoflow import InfoFlow
 
-class Net(nn.Module):
+# ==================== CIFAR-10 + Simple CNN ====================
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
+trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
+
+class SimpleCNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc = nn.Sequential(
-            nn.Linear(28*28, 128),
-            nn.ReLU(),
-            nn.Linear(128, 10)
+        self.net = nn.Sequential(
+            nn.Conv2d(3, 64, 3, padding=1), nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(64, 128, 3, padding=1), nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Flatten(),
+            nn.Linear(128*8*8, 256), nn.ReLU(),
+            nn.Linear(256, 10)
         )
-
     def forward(self, x):
-        return self.fc(x.view(x.size(0), -1))
+        return self.net(x)
 
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('.', train=True, download=True, transform=transforms.ToTensor()),
-    batch_size=64, shuffle=True)
-
-def train(optimizer_class, name, lr=0.001):
-    model = Net()
+def train_benchmark(optimizer_class, name, lr, epochs=5):
+    model = SimpleCNN()
     optimizer = optimizer_class(model.parameters(), lr=lr)
-    loss_fn = nn.CrossEntropyLoss()
-
-    print(f"\n=== {name} (lr={lr}) ===")
-    for epoch in range(3):
+    criterion = nn.CrossEntropyLoss()
+    print(f"\n=== {name} (lr={lr}) - CIFAR-10 ===")
+    for epoch in range(epochs):
         total_loss = 0.0
-        for data, target in train_loader:
+        for data, target in trainloader:
             optimizer.zero_grad()
             output = model(data)
-            loss = loss_fn(output, target)
+            loss = criterion(output, target)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-
-        avg_loss = total_loss / len(train_loader)
-        print(f"Epoch {epoch}: {avg_loss:.4f} (total: {total_loss:.1f})")
+        avg = total_loss / len(trainloader)
+        print(f"Epoch {epoch}: {avg:.4f}")
 
 # ====================== EJECUCIÓN ======================
 print("=== Adam ===")
-train(optim.Adam, "Adam", lr=0.001)
+train_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 
-print("\n=== InfoFlow ===")
-train(InfoFlow, "InfoFlow", lr=0.1)   # ← valor óptimo actual
+print("\n=== InfoFlow v2.0 ===")
+train_benchmark(InfoFlow, "InfoFlow", lr=0.08, epochs=5)
