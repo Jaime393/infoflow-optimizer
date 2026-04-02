@@ -1,14 +1,18 @@
-import sys
-sys.path.insert(0, '/content/infoflow-optimizer')
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+
 from infoflow import InfoFlow
 
-# ==================== CIFAR-10 + Simple CNN ====================
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
+# ====================== CIFAR-10 BENCHMARK ======================
+print("🚀 Descargando CIFAR-10...")
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+])
+
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
 
@@ -27,9 +31,9 @@ class SimpleCNN(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def train_benchmark(optimizer_class, name, lr, epochs=5):
+def run_benchmark(OptimizerClass, name, lr=0.001, epochs=5):
     model = SimpleCNN()
-    optimizer = optimizer_class(model.parameters(), lr=lr)
+    optimizer = OptimizerClass(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     print(f"\n=== {name} (lr={lr}) - CIFAR-10 ===")
     for epoch in range(epochs):
@@ -42,11 +46,13 @@ def train_benchmark(optimizer_class, name, lr, epochs=5):
             optimizer.step()
             total_loss += loss.item()
         avg = total_loss / len(trainloader)
-        print(f"Epoch {epoch}: {avg:.4f}")
+        print(f"Epoch {epoch+1}: {avg:.4f}  (total: {total_loss:.1f})")
 
 # ====================== EJECUCIÓN ======================
 print("=== Adam ===")
-train_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
+run_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 
-print("\n=== InfoFlow v2.0 ===")
-train_benchmark(InfoFlow, "InfoFlow", lr=0.08, epochs=5)
+print("\n=== InfoFlow v2.1 (Information Field Theory) ===")
+run_benchmark(InfoFlow, "InfoFlow", lr=0.05, epochs=5)
+
+print("\n✅ ¡BENCHMARK TERMINADO!")
