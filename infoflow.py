@@ -1,8 +1,3 @@
-# ================================================
-# INFOFLOW OPTIMIZER v2.0 - NIVEL FINAL AVANZADO
-# Inspirado en Information Field Theory (2026)
-# ================================================
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,11 +5,11 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.optim.optimizer import Optimizer
 
-# ====================== INFOFLOW v2.0 (AVANZADO) ======================
+# ====================== INFOFLOW v2.0 FINAL (AVANZADO) ======================
 class InfoFlow(Optimizer):
     """
-    InfoFlow Optimizer v2.0™ - Nivel Final
-    Normalización ∇log ρ + Fisher diagonal + protección adaptativa
+    InfoFlow Optimizer v2.0 FINAL
+    Inspirado en Information Field Theory (Juan Diego Vicente Gabancho, 2026)
     """
     def __init__(self, params, lr=0.08, eps=1e-8, beta=0.9, weight_decay=1e-4, fisher_scale=0.1):
         defaults = dict(lr=lr, eps=eps, beta=beta, weight_decay=weight_decay, fisher_scale=fisher_scale)
@@ -38,19 +33,18 @@ class InfoFlow(Optimizer):
 
                 grad = p.grad.data
 
-                # Weight decay
                 if weight_decay != 0:
                     grad = grad.add(p.data, alpha=weight_decay)
 
-                # 🔥 CORE: Information Flow (∇log ρ)
+                # 🔥 CORE: Information Flow Normalization (∇log ρ)
                 grad_mean_abs = grad.abs().mean() + eps
                 info_grad = grad / grad_mean_abs
 
-                # Fisher diagonal (natural gradient light)
+                # Fisher diagonal approximation
                 fisher_diag = grad.abs() + eps
                 info_grad = info_grad / (fisher_diag ** fisher_scale)
 
-                # Protección contra explosiones
+                # Protección anti-explosion
                 info_grad = torch.clamp(info_grad, -5.0, 5.0)
 
                 # Momentum
@@ -60,14 +54,14 @@ class InfoFlow(Optimizer):
                 momentum = state['momentum']
                 momentum.mul_(beta).add_(info_grad, alpha=1 - beta)
 
-                # Actualización
+                # Update
                 p.data.add_(momentum, alpha=-lr)
 
         return loss
 
 
 # ====================== BENCHMARK CIFAR-10 (NIVEL PRO) ======================
-print("Descargando CIFAR-10...")
+print("🚀 Descargando CIFAR-10...")
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -91,9 +85,9 @@ class SimpleCNN(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def run_benchmark(optimizer_class, name, lr=0.001, epochs=5):
+def run_benchmark(OptimizerClass, name, lr=0.001, epochs=5):
     model = SimpleCNN()
-    optimizer = optimizer_class(model.parameters(), lr=lr)
+    optimizer = OptimizerClass(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
     print(f"\n=== {name} (lr={lr}) - CIFAR-10 ===")
@@ -107,7 +101,7 @@ def run_benchmark(optimizer_class, name, lr=0.001, epochs=5):
             optimizer.step()
             total_loss += loss.item()
         avg = total_loss / len(trainloader)
-        print(f"Epoch {epoch+1}: {avg:.4f}")
+        print(f"Epoch {epoch+1}: {avg:.4f}  (total loss: {total_loss:.1f})")
 
 # ====================== EJECUCIÓN FINAL ======================
 print("🚀 INICIANDO BENCHMARK NIVEL FINAL...\n")
@@ -118,5 +112,4 @@ run_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 print("\n=== InfoFlow v2.0 (Information Field Theory) ===")
 run_benchmark(InfoFlow, "InfoFlow", lr=0.08, epochs=5)
 
-print("\n✅ ¡Benchmark completado! Compara los números.")
-print("InfoFlow debería mostrar mejor estabilidad o convergencia más rápida.")
+print("\n✅ ¡BENCHMARK TERMINADO!")
