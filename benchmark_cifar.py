@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from infoflow_optimizer.infoflow import InfoFlow
+from infoflow import InfoFlow
 
 # ==================== CIFAR-10 + Simple CNN ====================
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
