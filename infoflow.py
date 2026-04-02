@@ -7,11 +7,7 @@ from torch.optim.optimizer import Optimizer
 
 # ====================== INFOFLOW v2.0 FINAL (AVANZADO) ======================
 class InfoFlow(Optimizer):
-    """
-    InfoFlow Optimizer v2.0 FINAL
-    Inspirado en Information Field Theory (Juan Diego Vicente Gabancho, 2026)
-    """
-    def __init__(self, params, lr=0.08, eps=1e-8, beta=0.9, weight_decay=1e-4, fisher_scale=0.1):
+    def __init__(self, params, lr=0.001, eps=1e-8, beta=0.9, weight_decay=1e-4, fisher_scale=0.05):
         defaults = dict(lr=lr, eps=eps, beta=beta, weight_decay=weight_decay, fisher_scale=fisher_scale)
         super().__init__(params, defaults)
 
@@ -33,24 +29,26 @@ class InfoFlow(Optimizer):
 
                 grad = p.grad.data
 
+                # Weight decay
                 if weight_decay != 0:
                     grad = grad.add(p.data, alpha=weight_decay)
 
-                # 🔥 CORE: Information Flow Normalization (∇log ρ)
-                grad_mean_abs = grad.abs().mean() + eps
-                info_grad = grad / grad_mean_abs
+                # 🔥 NORMALIZACIÓN ESTABLE
+                norm = grad.norm() + eps
+                info_grad = grad / norm
 
-                # Fisher diagonal approximation
-                fisher_diag = grad.abs() + eps
+                # 🔥 FISHER SUAVE (NO EXPLOSIVO)
+                fisher_diag = grad.pow(2).mean() + eps
                 info_grad = info_grad / (fisher_diag ** fisher_scale)
 
-                # Protección anti-explosion
-                info_grad = torch.clamp(info_grad, -5.0, 5.0)
+                # 🔥 CLIPPING SEGURO
+                info_grad = torch.clamp(info_grad, -1.0, 1.0)
 
                 # Momentum
                 state = self.state[p]
                 if len(state) == 0:
                     state['momentum'] = torch.zeros_like(p.data)
+
                 momentum = state['momentum']
                 momentum.mul_(beta).add_(info_grad, alpha=1 - beta)
 
@@ -58,7 +56,6 @@ class InfoFlow(Optimizer):
                 p.data.add_(momentum, alpha=-lr)
 
         return loss
-
 
 # ====================== BENCHMARK CIFAR-10 (NIVEL PRO) ======================
 print("🚀 Descargando CIFAR-10...")
@@ -110,6 +107,6 @@ print("=== Adam ===")
 run_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 
 print("\n=== InfoFlow v2.0 (Information Field Theory) ===")
-run_benchmark(InfoFlow, "InfoFlow", lr=0.08, epochs=5)
+run_benchmark(InfoFlow, "InfoFlow", lr=0.01, epochs=5)
 
 print("\n✅ ¡BENCHMARK TERMINADO!")
