@@ -3,10 +3,10 @@ from torch.optim.optimizer import Optimizer
 
 class InfoFlow(Optimizer):
     """
-    InfoFlow Optimizer v2.3 - VERSIÓN DEFINITIVA Y FINAL
+    InfoFlow Optimizer v2.4 - VERSIÓN DEFINITIVA Y ESTABLE
     Inspirado en Information Field Theory (Juan Diego Vicente Gabancho, 2026)
     """
-    def __init__(self, params, lr=0.5, eps=1e-8, beta=0.9, weight_decay=1e-4, fisher_scale=0.1):
+    def __init__(self, params, lr=0.01, eps=1e-8, beta=0.9, weight_decay=1e-4, fisher_scale=0.05):
         defaults = dict(lr=lr, eps=eps, beta=beta, weight_decay=weight_decay, fisher_scale=fisher_scale)
         super().__init__(params, defaults)
 
@@ -31,7 +31,7 @@ class InfoFlow(Optimizer):
                 if weight_decay != 0:
                     grad = grad.add(p.data, alpha=weight_decay)
 
-                # 🔥 CORE: Information Flow Normalization (∇log ρ)
+                # 🔥 CORE: Information Flow Normalization
                 grad_mean_abs = grad.abs().mean() + eps
                 info_grad = grad / grad_mean_abs
 
@@ -39,8 +39,8 @@ class InfoFlow(Optimizer):
                 fisher_diag = grad.abs() + eps
                 info_grad = info_grad / (fisher_diag ** fisher_scale)
 
-                # Clipping seguro
-                info_grad = torch.clamp(info_grad, -3.0, 3.0)
+                # CLIPPING FUERTE (para evitar explosiones en CNN)
+                info_grad = torch.clamp(info_grad, -1.0, 1.0)
 
                 # Momentum
                 state = self.state[p]
