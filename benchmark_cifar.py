@@ -6,13 +6,8 @@ import torchvision.transforms as transforms
 
 from infoflow import InfoFlow
 
-# ====================== CIFAR-10 BENCHMARK ======================
 print("🚀 Descargando CIFAR-10...")
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
-
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
 
@@ -48,7 +43,6 @@ def run_benchmark(OptimizerClass, name, lr=0.001, epochs=5):
         avg = total_loss / len(trainloader)
         print(f"Epoch {epoch+1}: {avg:.4f}  (total: {total_loss:.1f})")
 
-# ====================== EJECUCIÓN ======================
 print("=== Adam ===")
 run_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 
