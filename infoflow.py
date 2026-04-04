@@ -46,27 +46,4 @@ class InfoFlow(Optimizer):
                 if len(state) == 0:
                     state['step'] = 0
                     state['m'] = torch.zeros_like(p.data)
-                    state['v'] = torch.zeros_like(p.data)
-
-                state['step'] += 1
-                step = state['step']
-                m = state['m']
-                v = state['v']
-
-                # 3. Momentum + segundo momento con bias correction
-                m.mul_(beta1).add_(grad, alpha=1 - beta1)
-                v.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
-
-                bias_correction1 = 1 - beta1 ** step
-                bias_correction2 = 1 - beta2 ** step
-
-                # 4. Update AdamW
-                denom = (v.sqrt() / bias_correction2.sqrt()).add_(eps)
-                step_size = lr / bias_correction1
-                p.data.addcdiv_(m, denom, value=-step_size)
-
-                # 5. Componente InfoFlow: sign adaptativo (flujo ultra-rápido)
-                sign_update = torch.sign(m)
-                p.data.add_(sign_update, alpha=-lr * sign_mix)
-
-        return loss
+                    state['v'] = torch.zeros
