@@ -1,7 +1,7 @@
 # ==================== BENCHMARK CIFAR-10 - InfoFlow v5.0 MAXIMUM ====================
 import sys
 import os
-# FIX para que siempre encuentre el módulo en Colab / git clone
+# FIX para Colab + git clone (encuentra el módulo aunque se llame infoflow.py)
 sys.path.insert(0, os.path.abspath('.'))
 
 import torch
@@ -11,7 +11,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import time
-from infoflow_optimizer import InfoFlow   # ← Ahora sí va a encontrar el archivo
+from infoflow import InfoFlow   # ← Nombre correcto del archivo infoflow.py
 
 # Modelo CNN simple pero efectivo
 class SimpleCNN(nn.Module):
