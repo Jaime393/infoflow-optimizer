@@ -1,7 +1,6 @@
-# ==================== BENCHMARK CIFAR-10 - InfoFlow v5.0 MAXIMUM ====================
+# ==================== BENCHMARK CIFAR-10 - InfoFlow v6.0 ULTRA STABLE ====================
 import sys
 import os
-# FIX para Colab + git clone (encuentra el módulo aunque se llame infoflow.py)
 sys.path.insert(0, os.path.abspath('.'))
 
 import torch
@@ -11,7 +10,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import time
-from infoflow import InfoFlow   # ← Nombre correcto del archivo infoflow.py
+from infoflow import InfoFlow
 
 # Modelo CNN simple pero efectivo
 class SimpleCNN(nn.Module):
@@ -41,7 +40,7 @@ trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True
 trainloader = DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2, pin_memory=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"🚀 InfoFlow v5.0 MAXIMUM corriendo en {device}")
+print(f"🚀 InfoFlow v6.0 ULTRA STABLE corriendo en {device}")
 criterion = nn.CrossEntropyLoss()
 
 # === Adam baseline ===
@@ -64,11 +63,11 @@ for epoch in range(5):
     total_time = (time.time() - start) * 1000
     print(f"Epoch {epoch+1}: {epoch_loss:.4f}  (total: {total_time:.1f})")
 
-# === InfoFlow v5.0 MAXIMUM ===
+# === InfoFlow v6.0 ULTRA STABLE ===
 model_infoflow = SimpleCNN().to(device)
 optimizer_infoflow = InfoFlow(model_infoflow.parameters())
 
-print("\n=== InfoFlow v5.0 MAXIMUM - CIFAR-10 ===")
+print("\n=== InfoFlow v6.0 ULTRA STABLE - CIFAR-10 ===")
 for epoch in range(5):
     start = time.time()
     running_loss = 0.0
@@ -84,4 +83,4 @@ for epoch in range(5):
     total_time = (time.time() - start) * 1000
     print(f"Epoch {epoch+1}: {epoch_loss:.4f}  (total: {total_time:.1f})")
 
-print("\n✅ BENCHMARK TERMINADO - InfoFlow v5.0 MAXIMUM (versión definitiva)")
+print("\n✅ BENCHMARK TERMINADO - InfoFlow v6.0 ULTRA STABLE (versión definitiva)")
