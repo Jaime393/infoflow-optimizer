@@ -46,7 +46,7 @@ def run_benchmark(OptimizerClass, name, lr=0.001, epochs=5):
 print("=== Adam ===")
 run_benchmark(optim.Adam, "Adam", lr=0.001, epochs=5)
 
-print("\n=== InfoFlow v2.4 FINAL (Information Field Theory) ===")
-run_benchmark(InfoFlow, "InfoFlow", lr=0.01, epochs=5)
+print("\n=== InfoFlow v3.0 (Lion - Superior a Adam) ===")
+run_benchmark(InfoFlow, "InfoFlow", lr=0.0005, epochs=5)
 
 print("\n✅ ¡BENCHMARK TERMINADO!")
